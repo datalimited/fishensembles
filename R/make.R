@@ -3,31 +3,33 @@
 #' Fit a superensemble model with a simulated dataset. Note that this will
 #' take a few minutes to run.
 #'
-#' @importFrom dplyr arrange group_by do rename mutate select inner_join
-#'   left_join "%>%" summarise
 #' @param cores Number of cores to use
 #' @param ntree Number of trees. Passed to \code{\link[randomForest]{randomForest}}.
+#' @importFrom dplyr arrange_ group_by_ do rename_ mutate_ select_ inner_join
+#'   left_join "%>%" summarise_
 #' @return A list with two elements: \code{model} contains a model from the
 #'   package \pkg{randomForest} and \code{data} contains the data used to
 #'   fit the model.
 #' @export
 #' @examples
-#' x <- make()
-#' randomForest::partialPlot(x$model, x.var = "CMSY", pred.data = x$data)
+#' \dontrun{
+#'   x <- make()
+#'   randomForest::partialPlot(x$model, x.var = "CMSY", pred.data = x$data)
+#' }
 
 make <- function(ntree = 1000, cores = 2) {
   #Add spectral frequencies to simulated data
   #make spectral data
 
   dsim_spec<- dsim %>%
-    arrange(stock_id, year) %>%
-    group_by(stock_id, sigmaC, sigmaR, LH, iter, ED) %>%
+    arrange_(~stock_id, ~year) %>%
+    group_by_(~stock_id, ~sigmaC, ~sigmaR, ~LH, ~iter, ~ED) %>%
     do(train_spec_mat(.$catch)) %>%
-    rename(spec_freq = x, spec_dens = y) %>%
+    rename_(spec_freq = ~x, spec_dens = ~y) %>%
     as.data.frame()
 
   dsim_spec_wide <- dsim_spec %>%
-    mutate(spec_freq = paste0("spec_freq_", spec_freq)) %>%
+    mutate_(spec_freq = paste0("spec_freq_", ~spec_freq)) %>%
     reshape2::dcast(stock_id + sigmaC + sigmaR + LH + iter + ED ~ spec_freq,
       value.var = "spec_dens")
 
@@ -36,7 +38,7 @@ make <- function(ntree = 1000, cores = 2) {
   dsim$method_id <- sub("COM.SIR", "COMSIR", dsim$method_id) # to match RAM fits
 
   dsim <- dsim %>%
-    arrange(stock_id, iter, year) # critical since not all in order
+    arrange_(~stock_id, ~iter, ~year) # critical since not all in order
 
   doParallel::registerDoParallel(cores = cores)
 
@@ -47,14 +49,14 @@ make <- function(ntree = 1000, cores = 2) {
 
   # join in some characteristics that we'll use in models:
   dsim_meta <- dsim %>%
-    group_by(stock_id, iter) %>%
-    summarise(
-      spec_freq_0.05 = spec_freq_0.05[1],
-      spec_freq_0.2 = spec_freq_0.2[1])
+    group_by_(~stock_id, ~iter) %>%
+    summarise_(
+      spec_freq_0.05 = ~spec_freq_0.05[1],
+      spec_freq_0.2 = ~spec_freq_0.2[1])
   dsim_sum <- inner_join(dsim_sum, dsim_meta)
 
   # save a data frame of 'true' operating model values to merge in:
-  trues <- select(dsim_sum, stock_id, iter,  bbmsy_true_mean)
+  trues <- select_(dsim_sum, ~stock_id, ~iter, ~bbmsy_true_mean)
   trues <- trues[!duplicated(trues), ] # one value per operating model stockid
 
   # switch from long to wide format for modelling:
