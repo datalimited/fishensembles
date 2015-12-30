@@ -6,6 +6,11 @@
 \usage{
 make(ntree = 1000, cores = 2)
 }
+\arguments{
+\item{ntree}{Number of trees. Passed to \code{\link[randomForest]{randomForest}}.}
+
+\item{cores}{Number of cores to use}
+}
 \value{
 A list with two elements: \code{model} contains a model from the
   package \pkg{randomForest} and \code{data} contains the data used to
@@ -16,7 +21,9 @@ Fit a superensemble model with a simulated dataset. Note that this will
 take a few minutes to run.
 }
 \examples{
-x <- make()
-randomForest::partialPlot(x$model, x.var = "CMSY", pred.data = x$data)
+\dontrun{
+  x <- make()
+  randomForest::partialPlot(x$model, x.var = "CMSY", pred.data = x$data)
+}
 }
 
