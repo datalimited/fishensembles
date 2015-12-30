@@ -6,7 +6,7 @@
 #' @param cores Number of cores to use
 #' @param ntree Number of trees. Passed to \code{\link[randomForest]{randomForest}}.
 #' @importFrom dplyr arrange_ group_by_ do rename_ mutate_ select_ inner_join
-#'   left_join "%>%" summarise_
+#'   left_join "%>%" summarise mutate
 #' @return A list with two elements: \code{model} contains a model from the
 #'   package \pkg{randomForest} and \code{data} contains the data used to
 #'   fit the model.
@@ -29,7 +29,7 @@ make <- function(ntree = 1000, cores = 2) {
     as.data.frame()
 
   dsim_spec_wide <- dsim_spec %>%
-    mutate_(spec_freq = paste0("spec_freq_", ~spec_freq)) %>%
+    mutate(spec_freq = paste0("spec_freq_", spec_freq)) %>%
     reshape2::dcast(stock_id + sigmaC + sigmaR + LH + iter + ED ~ spec_freq,
       value.var = "spec_dens")
 
@@ -50,9 +50,9 @@ make <- function(ntree = 1000, cores = 2) {
   # join in some characteristics that we'll use in models:
   dsim_meta <- dsim %>%
     group_by_(~stock_id, ~iter) %>%
-    summarise_(
-      spec_freq_0.05 = ~spec_freq_0.05[1],
-      spec_freq_0.2 = ~spec_freq_0.2[1])
+    summarise(
+      spec_freq_0.05 = spec_freq_0.05[1],
+      spec_freq_0.2 = spec_freq_0.2[1])
   dsim_sum <- inner_join(dsim_sum, dsim_meta)
 
   # save a data frame of 'true' operating model values to merge in:
