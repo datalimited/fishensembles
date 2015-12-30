@@ -6,7 +6,7 @@ Authors@R: c(person("Sean", "Anderson", email =
     "sean@seananderson.ca", role = c("aut", "cre")),
     person("Working group", "members", role = "ctb"))
 Description: Combine data-limited fisheries models by fitting a superensemble
-    model to simulated data
+    model to simulated data.
 License: MIT + file LICENSE
 Depends:
     R (>= 3.2.2)
