@@ -8,6 +8,8 @@ Authors@R: c(person("Sean", "Anderson", email =
 Description: Combine data-limited fisheries models by fitting a superensemble
     model to simulated data
 License: MIT + file LICENSE
+Depends:
+    R (>= 3.2.2)
 Imports:
     dplyr,
     plyr,
