@@ -1,0 +1,18 @@
+Package: fishensemble
+Type: Package
+Title: Create Fisheries Superensemble Models
+Version: 0.0.1
+Authors@R: c(person("Sean", "Anderson", email =
+    "sean@seananderson.ca", role = c("aut", "cre")),
+    person("Working group", "members", role = "ctb"))
+Description: Combine data-limited fisheries models by fitting a superensemble
+    model to simulated data
+License: MIT + file LICENSE
+Imports:
+    dplyr,
+    plyr,
+    doParallel,
+    reshape2,
+    randomForest
+LazyData: TRUE
+RoxygenNote: 5.0.1
