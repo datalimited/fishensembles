@@ -1,4 +1,4 @@
-Package: fishensemble
+Package: fishensembles
 Type: Package
 Title: Create Fisheries Superensemble Models
 Version: 0.0.1
