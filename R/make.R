@@ -5,6 +5,8 @@
 #'
 #' @importFrom dplyr arrange group_by do rename mutate select inner_join
 #'   left_join "%>%" summarise
+#' @param cores Number of cores to use
+#' @param ntree Number of trees. Passed to \code{\link[randomForest]{randomForest}}.
 #' @return A list with two elements: \code{model} contains a model from the
 #'   package \pkg{randomForest} and \code{data} contains the data used to
 #'   fit the model.
