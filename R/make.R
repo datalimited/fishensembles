@@ -5,6 +5,7 @@
 #'
 #' @param cores Number of cores to use
 #' @param ntree Number of trees. Passed to \code{\link[randomForest]{randomForest}}.
+#' @param ens_formula Specify the formula used in random forest model
 #' @importFrom dplyr arrange_ group_by_ do rename_ mutate_ select_ inner_join
 #'   left_join "%>%" summarise mutate
 #' @return A list with two elements: \code{model} contains a model from the
@@ -17,7 +18,8 @@
 #'   randomForest::partialPlot(x$model, x.var = "CMSY", pred.data = x$data)
 #' }
 
-make <- function(ntree = 1000, cores = 2) {
+make <- function(ntree = 1000, cores = 2, ens_formula = log(bbmsy_true_mean) ~ CMSY + COMSIR + Costello + SSCOM +
+                   spec_freq_0.05 + spec_freq_0.2) {
   #Add spectral frequencies to simulated data
   #make spectral data
 
@@ -67,9 +69,7 @@ make <- function(ntree = 1000, cores = 2) {
 
   #Train random forest ensemble model with simulated data
   d_mean_sim <- na.omit(d_mean_sim)
-  m_rf <- randomForest::randomForest(
-    log(bbmsy_true_mean) ~ CMSY + COMSIR + Costello + SSCOM +
-      spec_freq_0.05 + spec_freq_0.2,
+  m_rf <- randomForest::randomForest(formula = ens_formula,
     data = d_mean_sim, ntree = ntree)
   list(model = m_rf, data = d_mean_sim)
 }
