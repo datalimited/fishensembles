@@ -4,12 +4,15 @@
 \alias{make}
 \title{Make superensemble}
 \usage{
-make(ntree = 1000, cores = 2)
+make(ntree = 1000, cores = 2, formula = log(bbmsy_true_mean) ~ CMSY +
+  COMSIR + Costello + SSCOM + spec_freq_0.05 + spec_freq_0.2)
 }
 \arguments{
 \item{ntree}{Number of trees. Passed to \code{\link[randomForest]{randomForest}}.}
 
 \item{cores}{Number of cores to use}
+
+\item{formula}{Specify the formula used in the random forest model}
 }
 \value{
 A list with two elements: \code{model} contains a model from the
