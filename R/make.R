@@ -24,6 +24,8 @@ make <- function(ntree = 1000, cores = 2,
   #Add spectral frequencies to simulated data
   #make spectral data
 
+  dsim <- dsim %>% mutate_(stock_id = paste(~stock_id, ~iter, ~sigmaC, ~sigmaR))
+
   dsim_spec<- dsim %>%
     arrange_(~stock_id, ~year) %>%
     group_by_(~stock_id, ~sigmaC, ~sigmaR, ~LH, ~iter, ~ED) %>%
@@ -59,14 +61,22 @@ make <- function(ntree = 1000, cores = 2,
   dsim_sum <- inner_join(dsim_sum, dsim_meta)
 
   # save a data frame of 'true' operating model values to merge in:
-  trues <- select_(dsim_sum, ~stock_id, ~iter, ~bbmsy_true_mean)
+  # Costello for some reason has slightly different true values:
+
+  trues <- select_(dsim_sum, ~stock_id, ~iter, ~method_id, ~bbmsy_true_mean)
+  trues <- trues[which(trues$method_id == "SSCOM"), ]
+  trues <- select_(trues, ~stock_id, ~iter, ~bbmsy_true_mean)
   trues <- trues[!duplicated(trues), ] # one value per operating model stockid
+
+  assertthat::assert_that(identical(nrow(trues), length(unique(dsim$stock_id))))
 
   # switch from long to wide format for modelling:
   d_mean_sim <- reshape2::dcast(dsim_sum,
     stock_id + iter + spec_freq_0.05 + spec_freq_0.2 ~ method_id,
     value.var = "bbmsy_est_mean")  %>%
     inner_join(trues)
+
+  assertthat::assert_that(identical(nrow(d_mean_sim), length(unique(dsim$stock_id))))
 
   #Train random forest ensemble model with simulated data
   d_mean_sim <- na.omit(d_mean_sim)

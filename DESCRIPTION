@@ -1,7 +1,7 @@
 Package: fishensembles
 Type: Package
 Title: Create Fisheries Superensemble Models
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(person("Sean", "Anderson", email =
     "sean@seananderson.ca", role = c("aut", "cre")),
     person("Working group", "members", role = "ctb"))
@@ -15,6 +15,7 @@ Imports:
     plyr,
     doParallel,
     reshape2,
-    randomForest
+    randomForest,
+    assertthat
 LazyData: TRUE
 RoxygenNote: 5.0.1
