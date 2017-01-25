@@ -7,7 +7,8 @@
 #' @param ntree Number of trees. Passed to \code{\link[randomForest]{randomForest}}.
 #' @param formula Specify the formula used in the random forest model
 #' @importFrom dplyr arrange_ group_by_ do rename_ mutate_ select_ inner_join
-#'   left_join "%>%" summarise mutate
+#'   left_join "%>%" summarise_
+#' @importFrom stats approx na.omit spec.ar
 #' @return A list with two elements: \code{model} contains a model from the
 #'   package \pkg{randomForest} and \code{data} contains the data used to
 #'   fit the model.
@@ -33,10 +34,10 @@ make <- function(ntree = 1000, cores = 2,
     rename_(spec_freq = ~x, spec_dens = ~y) %>%
     as.data.frame()
 
-  dsim_spec_wide <- dsim_spec %>%
-    mutate(spec_freq = paste0("spec_freq_", spec_freq)) %>%
-    reshape2::dcast(stock_id + sigmaC + sigmaR + LH + iter + ED ~ spec_freq,
-      value.var = "spec_dens")
+  dsim_spec$spec_freq <- paste0("spec_freq_", dsim_spec$spec_freq)
+  dsim_spec_wide <- reshape2::dcast(dsim_spec,
+    stock_id + sigmaC + sigmaR + LH + iter + ED ~ spec_freq,
+    value.var = "spec_dens")
 
   #adding sims data and spec data together for training model
   dsim <- suppressWarnings(left_join(dsim, dsim_spec_wide)) # warnings on character-factor conversions
@@ -55,9 +56,9 @@ make <- function(ntree = 1000, cores = 2,
   # join in some characteristics that we'll use in models:
   dsim_meta <- dsim %>%
     group_by_(~stock_id, ~iter) %>%
-    summarise(
-      spec_freq_0.05 = spec_freq_0.05[1],
-      spec_freq_0.2 = spec_freq_0.2[1])
+    summarise_(
+      spec_freq_0.05 = ~spec_freq_0.05[1],
+      spec_freq_0.2 = ~spec_freq_0.2[1])
   dsim_sum <- inner_join(dsim_sum, dsim_meta)
 
   # save a data frame of 'true' operating model values to merge in:
@@ -106,7 +107,7 @@ train_spec_mat <- function(x, freq_vec = 1/c(5, 20)) {
   if(length(x) >= 10) {
     sp <- spec.ar(x/max(x), plot = FALSE)
     # approximate at fixed frequencies - necessary as series of different length
-    approx(x = sp$freq, y = sp$spec, xout = freq_vec) %>% as.data.frame
+    as.data.frame(approx(x = sp$freq, y = sp$spec, xout = freq_vec))
   } else {
     data.frame(x=NA, y=NA, xout=NA)
   }
