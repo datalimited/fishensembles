@@ -26,6 +26,7 @@ make <- function(ntree = 1000, cores = 2,
   #make spectral data
 
   dsim <- dsim %>% mutate_(stock_id = paste(~stock_id, ~iter, ~sigmaC, ~sigmaR))
+  dsim <- dsim[!duplicated(select_(dsim, ~stock_id, ~iter, ~year, ~method_id)), ]
 
   dsim_spec<- dsim %>%
     arrange_(~stock_id, ~year) %>%
