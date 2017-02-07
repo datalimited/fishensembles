@@ -29,6 +29,7 @@ make <- function(ntree = 1000, cores = 2,
   dsim <- dsim[!duplicated(dplyr::select(dsim, stock_id, year, method_id)), ]
 
   dsim_spec<- dsim %>%
+    filter(method_id == "SSCOM") %>% # pick one
     arrange_(~stock_id, ~year) %>%
     group_by_(~stock_id, ~sigmaC, ~sigmaR, ~LH, ~iter, ~ED) %>%
     do(train_spec_mat(.$catch)) %>%
@@ -56,14 +57,13 @@ make <- function(ntree = 1000, cores = 2,
 
   # join in some characteristics that we'll use in models:
   dsim_meta <- dsim %>%
-    group_by_(~stock_id, ~iter) %>%
+    group_by_(~stock_id, ~iter, ~method_id) %>%
     summarise_(
       spec_freq_0.05 = ~spec_freq_0.05[1],
       spec_freq_0.2 = ~spec_freq_0.2[1])
   dsim_sum <- inner_join(dsim_sum, dsim_meta)
 
   # save a data frame of 'true' operating model values to merge in:
-  # Costello for some reason has slightly different true values:
 
   trues <- select_(dsim_sum, ~stock_id, ~iter, ~method_id, ~bbmsy_true_mean)
   trues <- trues[which(trues$method_id == "SSCOM"), ]
