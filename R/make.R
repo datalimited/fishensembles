@@ -29,7 +29,7 @@ make <- function(ntree = 1000, cores = 2,
   dsim <- dsim[!duplicated(dplyr::select(dsim, stock_id, year, method_id)), ]
 
   dsim_spec<- dsim %>%
-    filter(method_id == "SSCOM") %>% # pick one
+    dplyr::filter(method_id == "SSCOM") %>% # pick one
     arrange_(~stock_id, ~year) %>%
     group_by_(~stock_id, ~sigmaC, ~sigmaR, ~LH, ~iter, ~ED) %>%
     do(train_spec_mat(.$catch)) %>%
