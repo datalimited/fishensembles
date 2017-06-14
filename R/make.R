@@ -1,17 +1,23 @@
 #' Make superensemble
 #'
-#' Fit a superensemble model with a simulated dataset. Note that this will
-#' take a few minutes to run.
+#' Fit a superensemble model with a simulated dataset. Note that this will take
+#' a few minutes to run.
 #'
 #' @param cores Number of cores to use
-#' @param ntree Number of trees. Passed to \code{\link[randomForest]{randomForest}}.
+#' @param ntree Number of trees. Passed to
+#'   \code{\link[randomForest]{randomForest}}.^
 #' @param formula Specify the formula used in the random forest model
+#' @param type Which type of ensemble model to build. Types are rf (random
+#'   forest), gbm (GBM), lm (linear regression). Note that in the case of linear
+#'   regression you may want to specify the formula to include interactions. For
+#'   example, to include all 2-way interactions: \code{log(bbmsy_true_mean) ~
+#'   (CMSY + COMSIR + Costello + SSCOM + spec_freq_0.05 + spec_freq_0.2)^2}
 #' @importFrom dplyr arrange_ group_by_ do rename_ mutate_ select_ inner_join
 #'   left_join "%>%" summarise_
 #' @importFrom stats approx na.omit spec.ar
 #' @return A list with two elements: \code{model} contains a model from the
-#'   package \pkg{randomForest} and \code{data} contains the data used to
-#'   fit the model.
+#'   package \pkg{randomForest} and \code{data} contains the data used to fit
+#'   the model.
 #' @export
 #' @examples
 #' \dontrun{
@@ -21,9 +27,14 @@
 
 make <- function(ntree = 1000, cores = 2,
   formula = log(bbmsy_true_mean) ~ CMSY + COMSIR + Costello + SSCOM +
-    spec_freq_0.05 + spec_freq_0.2) {
+    spec_freq_0.05 + spec_freq_0.2,
+  type = c("rf", "gbm", "lm")) {
   #Add spectral frequencies to simulated data
   #make spectral data
+
+  type <- type[[1]]
+  assertthat::assert_that(is.character(type))
+  assertthat::assert_that(type %in% c("rf", "gbm", "lm"))
 
   dsim <- dsim %>% dplyr::mutate(stock_id = paste(stock_id, iter, sigmaC, sigmaR))
   dsim <- dsim[!duplicated(dplyr::select(dsim, stock_id, year, method_id)), ]
@@ -82,9 +93,20 @@ make <- function(ntree = 1000, cores = 2,
 
   #Train random forest ensemble model with simulated data
   d_mean_sim <- na.omit(d_mean_sim)
-  m_rf <- randomForest::randomForest(formula = formula,
-    data = d_mean_sim, ntree = ntree)
-  list(model = m_rf, data = d_mean_sim)
+
+  if (type == "rf") {
+    m <- randomForest::randomForest(formula = formula,
+      data = d_mean_sim, ntree = ntree)
+  }
+  if (type == "gbm") {
+    m <- gbm::gbm(formula = formula,
+      data = d_mean_sim, ntree = ntree, distribution = "gaussian",
+      n.trees = 2000L, interaction.depth = 6, shrinkage = 0.01)
+  }
+  if (type == "lm") {
+    m <- stats::lm(formula = formula, data = d_mean_sim)
+  }
+  list(model = m, data = d_mean_sim)
 }
 
 mean_bbmsy <- function(dat, years_window = 5L) {

@@ -16,6 +16,7 @@ Imports:
     doParallel,
     reshape2,
     randomForest,
-    assertthat
+    assertthat,
+    gbm
 LazyData: TRUE
 RoxygenNote: 5.0.1
