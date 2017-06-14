@@ -5,23 +5,31 @@
 \title{Make superensemble}
 \usage{
 make(ntree = 1000, cores = 2, formula = log(bbmsy_true_mean) ~ CMSY +
-  COMSIR + Costello + SSCOM + spec_freq_0.05 + spec_freq_0.2)
+  COMSIR + Costello + SSCOM + spec_freq_0.05 + spec_freq_0.2, type = c("rf",
+  "gbm", "lm"))
 }
 \arguments{
-\item{ntree}{Number of trees. Passed to \code{\link[randomForest]{randomForest}}.}
+\item{ntree}{Number of trees. Passed to
+\code{\link[randomForest]{randomForest}}.}
 
 \item{cores}{Number of cores to use}
 
 \item{formula}{Specify the formula used in the random forest model}
+
+\item{type}{Which type of ensemble model to build. Types are rf (random
+forest), gbm (GBM), lm (linear regression). Note that in the case of linear
+regression you may want to specify the formula to include interactions. For
+example, to include all 2-way interactions: \code{log(bbmsy_true_mean) ~
+(CMSY + COMSIR + Costello + SSCOM + spec_freq_0.05 + spec_freq_0.2)^2}}
 }
 \value{
 A list with two elements: \code{model} contains a model from the
-  package \pkg{randomForest} and \code{data} contains the data used to
-  fit the model.
+  package \pkg{randomForest} and \code{data} contains the data used to fit
+  the model.
 }
 \description{
-Fit a superensemble model with a simulated dataset. Note that this will
-take a few minutes to run.
+Fit a superensemble model with a simulated dataset. Note that this will take
+a few minutes to run.
 }
 \examples{
 \dontrun{
@@ -29,4 +37,3 @@ take a few minutes to run.
   randomForest::partialPlot(x$model, x.var = "CMSY", pred.data = x$data)
 }
 }
-
