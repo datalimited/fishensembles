@@ -100,7 +100,7 @@ make <- function(ntree = 1000, cores = 2,
   }
   if (type == "gbm") {
     m <- gbm::gbm(formula = formula,
-      data = d_mean_sim, ntree = ntree, distribution = "gaussian",
+      data = d_mean_sim, distribution = "gaussian",
       n.trees = 2000L, interaction.depth = 6, shrinkage = 0.01)
   }
   if (type == "lm") {
